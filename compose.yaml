@@ -1,4 +1,34 @@
 services:
+  backend:
+    build: .
+    restart: always
+    # Map the backend service port to your local machine
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+    # Ensure the backend service waits for the database to be ready before starting
+    depends_on:
+      - db
+    
+    develop:
+      watch:
+        # Sync Python files directly into the container instantly
+        - action: sync
+          path: ./src
+          target: /app/src
+        
+        - action: sync
+          path: ./main.py
+          target: /app/main.py
+
+        # If you add new packages, tell Docker to rebuild the full image
+        - action: rebuild
+          path: ./pyproject.toml
+        
+        - action: rebuild
+          path: ./uv.lock
   db:
     image: postgres:16-alpine
     restart: always
@@ -9,7 +39,7 @@ services:
       POSTGRES_DB: fastapidb
     # Map the container's Postgres port to your local machine
     ports:
-      - "8000:5432"
+      - "5433:5432"
     # Mount the volume to persist data across container restarts
     volumes:
       - postgres_data:/var/lib/postgresql/data
