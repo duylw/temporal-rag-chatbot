@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = "myuser"
     POSTGRES_PASSWORD: str = "mypassword"
     POSTGRES_HOST: str = "localhost"
-    POSTGRES_PORT: str = "5432"
+    POSTGRES_PORT: str = "8000"
     POSTGRES_DB: str = "fastapidb"
 
     @property

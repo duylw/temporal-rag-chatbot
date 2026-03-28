@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.user import User
 from src.schemas.user import UserCreate
@@ -12,3 +13,13 @@ class UserRepository:
         await self.session.commit()
         await self.session.refresh(user)
         return user
+    
+    async def get_by_id(self, user_id: int) -> User:
+        result = await self.session.get(User, user_id)
+        return result
+    
+    async def list(self, limit: int = 10, offset: int = 0) -> list[User]:
+        result = await self.session.execute(
+            select(User).offset(offset).limit(limit)
+        )
+        return result.scalars().all()

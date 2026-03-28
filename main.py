@@ -1,10 +1,29 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from src.database.session import get_db_session
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from src.api.users import router as users_router
+from contextlib import asynccontextmanager
 
-router = APIRouter()
+from src.database.session import engine
+from src.models.base import Base
 
-@router.get("/users")
-async def get_users(db: AsyncSession = Depends(get_db_session)):
-    # Your repository layer will use this db session!
-    return {"message": "Database connected"}
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # This runs when the server starts
+    async with engine.begin() as conn:
+        # Create all tables defined in your models
+        await conn.run_sync(Base.metadata.create_all)
+    
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
+
+app.include_router(users_router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
