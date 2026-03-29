@@ -2,9 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.api.users import router as users_router
 from contextlib import asynccontextmanager
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.session import engine
 from src.models.base import Base
+from src.database.seed import seed_data_if_empty
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -12,6 +14,9 @@ async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         # Create all tables defined in your models
         await conn.run_sync(Base.metadata.create_all)
+    
+    async with AsyncSession(engine) as session:
+        await seed_data_if_empty(session)
     
     yield
 
