@@ -1,10 +1,12 @@
 import uuid
-
+from typing import TYPE_CHECKING
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from models.chunk import Chunk
 from src.models.base import Base
     
+if TYPE_CHECKING:
+    from src.models.chunk import Chunk
+
 
 class Video(Base):
     __tablename__ = "videos"

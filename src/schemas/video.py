@@ -4,5 +4,5 @@ class VideoBase(BaseModel):
     name: str
     url: str
 
-class videoCreate(VideoBase):
-    pass
+class VideoResponse(VideoBase):
+    id: str

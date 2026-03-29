@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.api.users import router as users_router
+from src.api.videos import router as videos_router
+from src.api.chunks import router as chunks_router
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,6 +26,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(users_router)
+app.include_router(videos_router)
+app.include_router(chunks_router)
 
 app.add_middleware(
     CORSMiddleware,
