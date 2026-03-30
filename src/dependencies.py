@@ -1,5 +1,6 @@
 from src.services.user import UserService
 from src.services.video import VideoService
+from src.services.chunk import ChunkService
 
 from src.database.session import async_session_maker, get_db_session
 from collections.abc import AsyncGenerator
@@ -24,4 +25,5 @@ def get_user_service(dependency_session: AsyncSession = Depends(get_db_session))
 def get_video_service(dependency_session: AsyncSession = Depends(get_db_session)):
     return VideoService(dependency_session)
 
-
+def get_chunk_service(dependency_session: AsyncSession = Depends(get_db_session)):
+    return ChunkService(dependency_session)

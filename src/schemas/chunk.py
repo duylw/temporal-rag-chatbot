@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+import uuid
 
 class ChunkBase(BaseModel):
     content: str
@@ -6,8 +7,8 @@ class ChunkBase(BaseModel):
     duration: int
 
 class ChunkResponse(ChunkBase):
-    id: str  # UUID as string
-    video_id: str  # UUID as string
+    id: uuid.UUID  # UUID as string
+    video_id: uuid.UUID  # UUID as string
 
     class Config:
         orm_mode = True

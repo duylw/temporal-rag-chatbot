@@ -18,5 +18,3 @@ class Chunk(Base):
     
     # Establish the many-to-one relationship with the Video model
     video: Mapped["Video"] = relationship("Video", back_populates="chunks")
-
-

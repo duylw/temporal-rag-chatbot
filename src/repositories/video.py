@@ -1,3 +1,5 @@
+import uuid
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.video import Video
@@ -7,7 +9,7 @@ class VideoRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
     
-    async def get_by_id(self, video_id: int) -> VideoResponse:
+    async def get_by_id(self, video_id: uuid.UUID) -> VideoResponse:
         result = await self.session.get(Video, video_id)
         return result
     
