@@ -1,5 +1,6 @@
 import csv
 import os
+import pickle
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -7,9 +8,11 @@ from sqlalchemy import select
 from src.models.video import Video
 from src.models.chunk import Chunk
 
+from langchain_chroma import Chroma
+
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data")
 
-async def seed_data_if_empty(session: AsyncSession):
+async def seed_db_if_empty(session: AsyncSession):
     # Check if there's any data already
     result = await session.execute(select(Video).limit(1))
     if result.scalars().first() is not None:
@@ -68,3 +71,43 @@ async def seed_data_if_empty(session: AsyncSession):
 
     await session.commit()
     print("Database seeded successfully with CSV data.")
+
+
+def seed_vector_db_if_empty():
+    """
+    Seeds the ChromaDB vector database from a pickle file if it is empty.
+    """
+    try:
+        # Note: Use 'chromadb' and port 8000 when running inside the Docker network
+        chroma_client = Chroma(
+            host="chromadb",
+            port="8000",
+        )
+        
+        # 'langchain' is the default collection name used by langchain_chroma
+        result = chroma_client.get(include=["metadatas"])
+        
+        # Check if there's any data already
+        if len(result['ids']) > 0:
+            return
+
+        print("Seeding vector database...")
+        pkl_path = os.path.join(DATA_DIR, 'vector_data_export.pkl')
+        
+        if not os.path.exists(pkl_path):
+            print(f"Seed file not found: {pkl_path}")
+            return
+
+        with open(pkl_path, 'rb') as f:
+            loaded_data = pickle.load(f)
+
+        chroma_client._collection.add(
+            ids=loaded_data['ids'],
+            embeddings=loaded_data['embeddings'],
+            metadatas=loaded_data.get('metadatas', None), # In case metadatas is optional
+            documents=loaded_data['documents']
+        )
+        print("Vector database seeded successfully.")
+        
+    except Exception as e:
+        print(f"Failed to seed vector database: {e}")
