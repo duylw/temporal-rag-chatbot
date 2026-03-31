@@ -11,6 +11,8 @@ from src.database.session import engine
 from src.models.base import Base
 from src.database.seed import seed_db_if_empty, seed_vector_db_if_empty
 
+from src.services.bm25 import make_bm25_retriever
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # This runs when the server starts
@@ -23,6 +25,10 @@ async def lifespan(app: FastAPI):
         await seed_db_if_empty(session)
     
     seed_vector_db_if_empty() # Synchonous
+
+    # Create and store the BM25 retriever in the app state for later use
+    bm25_retriever = make_bm25_retriever()
+    app.state.bm25_retriever = bm25_retriever
 
     yield
 

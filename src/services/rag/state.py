@@ -19,20 +19,22 @@ class QueryEvaluation(BaseModel):
         description="A polite, student-facing message providing guidance. If irrelevant, it explains the assistant's scope; if relevant, it confirms the intent to search the lecture materials. Must be in Vietnamese."
     )
 
-class ResponseGrade(BaseModel):
-  is_relevant: bool = Field(description="Is the answer relevant to the query?")
-  suggestion: str = Field(description="Suggestion for improving the answer")
-  reasoning: str = Field(description="Reasoning for the answer")
+class AnswerGrade(BaseModel):
+    is_relevant: bool = Field(description="Is the answer relevant to the query?")
+    suggestion: str = Field(description="Suggestion for improving the answer")
+    reasoning: str = Field(description="Reasoning for the answer")
 
 
 class ThreadState(TypedDict):
-  messages: Annotated[list[AnyMessage], operator.add] # Chat messages
-  user_query: str
-  user_query_grade: QueryEvaluation
-  previous_refined_query: str
-  last_retrieved_docs: List[Document]
-  last_response: str
-  last_response_grade: ResponseGrade
+    messages: Annotated[list[AnyMessage], operator.add] # Chat messages
+    
+    original_query: str
+    rewritten_query: str
+    user_query_grade: QueryEvaluation
 
-  n_iterations: int
-  n_llm_calls: int
+    relevant_sources: List[Document]
+    answer: str
+    answer_grade: AnswerGrade
+
+    n_iterations: int
+    n_llm_calls: int
