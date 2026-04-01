@@ -1,17 +1,13 @@
-import logging
-
 from langchain_core.documents import Document
 from langchain_core.tools import tool
 
 from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_community.retrievers import BM25Retriever
 
-logger = logging.getLogger(__name__)
-
 
 def create_retriever_tool(
-    vectordb_retriever: VectorStoreRetriever,
-    bm25_retriever: BM25Retriever,
+    vectordb_retriever: VectorStoreRetriever | None = None,
+    bm25_retriever: BM25Retriever | None = None,
     top_k: int = 3,
     use_hybrid: bool = True,
     semantic_weight: float = 1.0,  # Add parameter for semantic weight
@@ -30,10 +26,15 @@ def create_retriever_tool(
 
     @tool
     async def hybrid_search(query:str) -> list[Document]:
-        # Hybrid Search using Reciprocal Rank Fusion (RRF)
+        """Hybrid Search using Reciprocal Rank Fusion (RRF)."""
 
-        semantic_res = await vectordb_retriever.ainvoke(query, k=top_k*2)
-        bm25_res = await bm25_retriever.ainvoke(query, k=top_k*2) if use_hybrid else []
+        semantic_res =  []
+        bm25_res =  []
+
+        if vectordb_retriever:
+            semantic_res = await vectordb_retriever.ainvoke(query, k=top_k)
+        if bm25_retriever:
+            bm25_res = await bm25_retriever.ainvoke(query, k=top_k)
 
         rrf_scores = {}
 
@@ -55,5 +56,27 @@ def create_retriever_tool(
         final_results = [item["doc"] for item in reranked_docs[:top_k]]
 
         return final_results
+    
+    @tool
+    async def semantic_search(query: str) -> list[Document]:
+        """Semantic search using vector database retriever."""
+        results = []
 
-    return hybrid_search
+        if vectordb_retriever:
+            results = await vectordb_retriever.ainvoke(query, k=top_k)
+
+        return results
+
+    @tool
+    async def bm25_search(query: str) -> list[Document]:
+        """BM25 search using BM25 retriever."""
+        results = []
+        if bm25_retriever:
+            results = await bm25_retriever.ainvoke(query, k=top_k)
+
+        return results
+
+    if use_hybrid:
+        return hybrid_search
+
+    return semantic_search, bm25_search

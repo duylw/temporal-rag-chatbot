@@ -1,13 +1,11 @@
 from dataclasses import dataclass
-from langchain_community.retrievers import BM25Retriever
-from langchain_core.vectorstores import VectorStoreRetriever 
 from langchain.chat_models import init_chat_model, BaseChatModel
 
 @dataclass
 class Context:
     """Runtime context for agent dependencies.
 
-    This contains immutable dependencies that nodes need but don't modify.
+    This contains immutable dependencies that nodes need but don't modify during runtime.
 
     """
     llm=BaseChatModel

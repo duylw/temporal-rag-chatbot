@@ -1,4 +1,4 @@
-from typing import TypedDict, Annotated, List
+from typing import TypedDict, Annotated, List, Optional
 from pydantic import BaseModel, Field
 import operator
 
@@ -28,13 +28,15 @@ class AnswerGrade(BaseModel):
 class ThreadState(TypedDict):
     messages: Annotated[list[AnyMessage], operator.add] # Chat messages
     
-    original_query: str
-    rewritten_query: str
-    user_query_grade: QueryEvaluation
+    original_query: Optional[str]
+    rewritten_query: Optional[str]
+    user_query_grade: Optional[QueryEvaluation]
 
-    relevant_sources: List[Document]
-    answer: str
-    answer_grade: AnswerGrade
+    source: List[Document]
+    answer: Optional[str]
+    answer_grade: Optional[AnswerGrade]
+    routing_decision: Optional[str]
 
+    routing_decision: Optional[str]
     n_iterations: int
     n_llm_calls: int
