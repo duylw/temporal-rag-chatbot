@@ -29,14 +29,14 @@ def continue_after_guardrail(state: ThreadState, runtime: Runtime[Context]) -> L
     :param runtime: Runtime context containing guardrail threshold
     :returns: "continue" if score >= threshold, "out_of_scope" otherwise
     """
-    user_query_grade = state.get("user_query_grade")[-1]
+    user_query_grade = state.get("user_query_grade")
     if not user_query_grade:
         return "continue"
 
     return "continue" if user_query_grade.is_lecture_related else "out_of_scope"
 
 
-async def invoke_query_guardrail(state: ThreadState, runtime: Runtime[Context]) -> Dict[str, List[QueryEvaluation] | int]:
+async def invoke_query_guardrail(state: ThreadState, runtime: Runtime[Context]) -> Dict[str, QueryEvaluation | int]:
     """Evaluate the initial query for relevance and clarity."""
     logger.info("NODE: invoke_query_guardrail")
     updates = {}
@@ -56,7 +56,7 @@ async def invoke_query_guardrail(state: ThreadState, runtime: Runtime[Context]) 
     
     logger.info(f"Grade result - Is lecture related: {res.is_lecture_related}, Reasoning: {res.reasoning[:50]}")
 
-    updates["user_query_grade"] = [res]
+    updates["user_query_grade"] = res
     updates["n_llm_calls"] = state.get("n_llm_calls", 0) + 1
 
     return updates

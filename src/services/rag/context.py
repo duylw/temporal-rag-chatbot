@@ -8,7 +8,6 @@ class Context:
     This contains immutable dependencies that nodes need but don't modify during runtime.
 
     """
-    llm=BaseChatModel
     llm_model: str = "gemini-2.5-flash-lite"
     model_provider: str = "google-genai"
     temperature: float = 0.0

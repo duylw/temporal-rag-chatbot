@@ -30,7 +30,7 @@ class ThreadState(TypedDict):
     
     original_query: Optional[str]
     rewritten_query: Annotated[List[str], operator.add]
-    user_query_grade: Annotated[List[QueryEvaluation], operator.add]
+    user_query_grade: QueryEvaluation
 
     source: List[Document]
     answer: Optional[str]

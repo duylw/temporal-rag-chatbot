@@ -1,3 +1,4 @@
+from services.rag.nodes.utils import extract_sources_from_tool_messages
 from services.rag.tools import create_retriever_tool
 from .nodes import (
     continue_after_guardrail,
@@ -16,10 +17,12 @@ from src.services.rag.context import Context
 
 from langchain_community.retrievers import BM25Retriever
 from langchain_core.vectorstores import VectorStoreRetriever
+from langchain_core.messages import HumanMessage
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import tools_condition, ToolNode
 
 from typing import Optional
+import time
 import logging
 
 logger = logging.getLogger(__name__)
@@ -39,7 +42,7 @@ class AgenticRagService:
 
     def _build_graph(self):
         # Build the graph using the provided nodes and configuration
-        logging.info("Building the agentic RAG graph!")
+        logger.info("Building the agentic RAG graph!")
 
         hybrid_search = create_retriever_tool(
             vectordb_retriever=self.vectordb_retriever,
@@ -88,9 +91,9 @@ class AgenticRagService:
 
         workflow.add_edge("response", END)
 
-        logging.info("Compiling the graph...")
+        logger.info("Compiling the graph...")
         completed_graph = workflow.compile()
-        logging.info("Graph compilation completed!")
+        logger.info("Graph compilation completed!")
 
         return completed_graph
 
@@ -103,19 +106,69 @@ class AgenticRagService:
         return await self._execute_graph(query, model)
 
     async def _execute_graph(self, query: str, model: Optional[str]) -> dict:
-        logging.info("Executing graph!")
-        return await self.graph.ainvoke({"query": query, "model": model})
+        start_time = time.time()
+
+        logger.info("Invoking LangGraph workflow")
+
+        model_to_use = model or self.graph_config.llm_model
+
+        logger.info("Initialze state")
+        inital_state = {
+            "messages": [HumanMessage(content=query)],
+            "n_iterations": 0,
+            "n_llm_calls": 0,
+            "original_query": None,
+            "rewritten_query": [],
+            "user_query_grade": [],
+            "source": [],
+            "answer": None,
+            "answer_grade": [],
+            "routing_decision": None
+        }    
+
+        logger.info("Initialze runtime context")
+        runtime_context = Context(
+          llm_model = model_to_use,
+          model_provider = "google-genai",
+          temperature = self.graph_config.temperature,
+          retriever_top_k = self.graph_config.retriever_top_k,
+          reranker_top_k = self.graph_config.reranker_top_k,
+          n_iterations = self.graph_config.n_iterations
+        )
+
+        result = await self.graph.ainvoke(inital_state, context=runtime_context)
+
+        execution_time = time.time() - start_time
+        logger.info(f"Graph execution completed in {execution_time:.2f}s")
+
+        # Extract last results
+        answer = self._extract_answer(result)
+        sources = self._extract_sources(result)
+        n_iterations = result.get("n_iterations", 0) + 1
+        rewritten_query = result.get("rewritten_query", [])[-1] if result.get("rewritten_query") else None
+        guardrail_result = result.get("user_query_grade").reasoning if result.get("user_query_grade") else None # a string
+
+        return {
+            "query": query,
+            "rewritten_query": rewritten_query,
+            "answer": answer,
+            "sources": sources,
+            "n_iterations": n_iterations,
+            "execution_time": execution_time,
+            "guardrail_result": guardrail_result
+        }
 
     def _extract_answer(self, result: dict) -> str:
         messages = result.get("messages", [])
-        if messages:
+
+        if not messages:
             return "No answer generated"
 
         last_message = messages[-1]
         return last_message.content if hasattr(last_message, "content") else str(last_message)
 
     def _extract_sources(self, result: dict) -> list:
-        pass
+        return extract_sources_from_tool_messages(result.get("messages", []))
 
     def _extract_reasoning(self, result: dict) -> str:
-        pass
+        return
