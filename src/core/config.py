@@ -41,6 +41,7 @@ class Settings(BaseConfigSettings):
     # ChromaDB connection settings match what we have in compose.yaml
     CHROMA_HOST:str = "localhost"
     CHROMA_PORT:str = "8000"
+    EMBEDDING_MODEL:str = "gemini-embedding-2-preview"
 
 def get_settings() -> Settings:
     return Settings()

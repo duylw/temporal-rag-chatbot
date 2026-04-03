@@ -5,7 +5,7 @@ from src.core.config import Settings, get_settings
 # Create the async engine
 engine = create_async_engine(
     get_settings().database_url,
-    echo=True, # Set to False in production
+    echo=False, # Set to False in production
     future=True,
 )
 

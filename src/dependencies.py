@@ -1,11 +1,15 @@
+from typing import Annotated
+
+from src.database.session import async_session_maker, get_db_session
 from src.services.user import UserService
 from src.services.video import VideoService
 from src.services.chunk import ChunkService
+from src.services.rag.agent_graph import AgenticRagService
 
-from src.database.session import async_session_maker, get_db_session
 from collections.abc import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession
 from langchain_community.retrievers import BM25Retriever
+from langchain_core.vectorstores import VectorStoreRetriever
 
 from fastapi import Depends, HTTPException, Request
 
@@ -28,6 +32,16 @@ def get_video_service(dependency_session: AsyncSession = Depends(get_db_session)
 def get_chunk_service(dependency_session: AsyncSession = Depends(get_db_session)):
     return ChunkService(dependency_session)
 
+def get_vector_db_retriever(request: Request) -> VectorStoreRetriever:
+    retriever = getattr(request.app.state, "chroma_retriever", None)
+    if not retriever:
+        # Prevent errors if queried before data exists
+        raise HTTPException(
+            status_code=503,
+            detail="Vector database is not yet initialized."
+        )
+    return retriever
+
 def get_bm25_retriever(request: Request) -> BM25Retriever:
     retriever = getattr(request.app.state, "bm25_retriever", None)
     if not retriever:
@@ -37,3 +51,15 @@ def get_bm25_retriever(request: Request) -> BM25Retriever:
             detail="BM25 Search index is not yet built or the database is empty."
         )
     return retriever
+
+def get_agentic_rag_service(request: Request) -> AgenticRagService:
+    rag_service = getattr(request.app.state, "rag_service", None)
+    if not rag_service:
+        # Prevent errors if queried before data exists
+        raise HTTPException(
+            status_code=503, 
+            detail="RAG service is not yet initialized."
+        )
+    return rag_service
+
+AgenticRAGDep = Annotated[AgenticRagService, Depends(get_agentic_rag_service)]

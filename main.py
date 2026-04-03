@@ -11,7 +11,18 @@ from src.database.session import engine
 from src.models.base import Base
 from src.database.seed import seed_db_if_empty, seed_vector_db_if_empty
 
-from src.services.bm25 import make_bm25_retriever
+from src.services.rag.bm25 import make_bm25_retriever
+from src.services.rag.vectordb import make_vector_db, make_vector_db_retriever
+from src.services.rag.factory import make_agentic_rag_service
+
+from dotenv import load_dotenv
+load_dotenv() # Load environment variables from .env file
+
+from src.core.logging import setup_logging
+setup_logging()
+
+import logging
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -27,8 +38,22 @@ async def lifespan(app: FastAPI):
     seed_vector_db_if_empty() # Synchonous
 
     # Create and store the BM25 retriever in the app state for later use
+    logging.info("Initializing BM25 retriever...")
     bm25_retriever = make_bm25_retriever()
     app.state.bm25_retriever = bm25_retriever
+    logging.info("Initialized BM25 retriever and stored in app state.")
+
+    # Create and store the Chroma retriever in the app state for later use
+    logging.info("Initializing Chroma retriever...")
+    chroma_retriever = make_vector_db_retriever()
+    app.state.chroma_retriever = chroma_retriever
+    logging.info("Initialized Chroma retriever and stored in app state.")
+
+    #Create and store Agentic Rag Service in the app state for later use
+    logging.info("Initializing Agentic RAG service...")
+    rag_service = make_agentic_rag_service(bm25_retriever, chroma_retriever)
+    app.state.rag_service = rag_service
+    logging.info("Initialized Agentic RAG service and stored in app state.")
 
     yield
 

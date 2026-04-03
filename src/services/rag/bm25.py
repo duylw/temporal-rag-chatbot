@@ -3,7 +3,7 @@ from langchain_core.documents import Document
 import pickle
 import os
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data")
+DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "..", "data")
 
 def make_bm25_retriever() -> BM25Retriever:
     """Factory function to create a BM25Service instance."""

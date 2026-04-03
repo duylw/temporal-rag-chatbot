@@ -9,6 +9,9 @@ from src.models.video import Video
 from src.models.chunk import Chunk
 
 from langchain_chroma import Chroma
+import logging
+
+logger = logging.getLogger(__name__)
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data")
 
@@ -16,7 +19,7 @@ async def seed_db_if_empty(session: AsyncSession):
     # Check if there's any data already
     result = await session.execute(select(Video).limit(1))
     if result.scalars().first() is not None:
-        # Data already exists, skip seeding
+        logger.info("Database already has data, skipping seeding.")
         return
 
     # 1. Load Videos
@@ -70,7 +73,7 @@ async def seed_db_if_empty(session: AsyncSession):
                 session.add(chunks[chunk_id])
 
     await session.commit()
-    print("Database seeded successfully with CSV data.")
+    logger.info("Database seeded successfully with CSV data.")
 
 
 def seed_vector_db_if_empty():
@@ -89,13 +92,14 @@ def seed_vector_db_if_empty():
         
         # Check if there's any data already
         if len(result['ids']) > 0:
+            logger.info("Vector database already has data, skipping seeding.")
             return
 
-        print("Seeding vector database...")
+        logger.info("Seeding vector database...")
         pkl_path = os.path.join(DATA_DIR, 'vector_data_export.pkl')
         
         if not os.path.exists(pkl_path):
-            print(f"Seed file not found: {pkl_path}")
+            logger.warning(f"Seed file not found: {pkl_path}")
             return
 
         with open(pkl_path, 'rb') as f:
@@ -107,7 +111,7 @@ def seed_vector_db_if_empty():
             metadatas=loaded_data.get('metadatas', None), # In case metadatas is optional
             documents=loaded_data['documents']
         )
-        print("Vector database seeded successfully.")
+        logger.info("Vector database seeded successfully.")
         
     except Exception as e:
-        print(f"Failed to seed vector database: {e}")
+        logger.error(f"Failed to seed vector database: {e}")
