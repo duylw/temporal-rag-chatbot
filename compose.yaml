@@ -5,6 +5,10 @@ services:
     # Map the backend service port to your local machine
     ports:
       - "8000:8000"
+
+    volumes:
+      - ./data/videos:/app/media/videos:ro
+
     environment:
       POSTGRES_HOST: db
       POSTGRES_PORT: "5432"

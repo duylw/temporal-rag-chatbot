@@ -6,7 +6,7 @@ import operator
 from langchain_core.documents import Document
 from langchain_core.messages import AnyMessage
 
-class QueryEvaluation(BaseModel):
+class GuardrailEvaluation(BaseModel):
     is_lecture_related: bool = Field(
             description="Boolean flag indicating whether the user's query is strictly relevant to the academic content, concepts, or logistics of the specific lecture."
     )
@@ -30,7 +30,7 @@ class ThreadState(TypedDict):
 
     original_query: Optional[str]
     rewritten_query: Annotated[List[str], operator.add]
-    user_query_grade: QueryEvaluation
+    guardrail_result: GuardrailEvaluation
 
     source: List[Document]
     answer: Optional[str]

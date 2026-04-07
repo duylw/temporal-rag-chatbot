@@ -147,13 +147,13 @@ class AgenticRagService:
         answer = self._extract_answer(result)
         sources = self._extract_sources(result)
         n_iterations = result.get("n_iterations", 0) + 1
-        rewritten_query = result.get("rewritten_query", [])[-1] if result.get("rewritten_query") else None
-        guardrail_result = result.get("user_query_grade").reasoning if result.get("user_query_grade") else None # a string
+        rewritten_query = result.get("rewritten_query", [])[-1] if result.get("rewritten_query") else "No rewritten query"
+        guardrail_result = result.get("user_query_grade").reasoning if result.get("user_query_grade") else "No guardrail result" # a string
 
         return {
             "query": query,
             "rewritten_query": rewritten_query,
-            "answer": answer,
+            "answer": answer or "No answer generated",
             "sources": sources,
             "n_iterations": n_iterations,
             "execution_time": execution_time,
@@ -174,7 +174,7 @@ class AgenticRagService:
         return last_message.content if hasattr(last_message, "content") else str(last_message)
 
     def _extract_sources(self, result: dict) -> list:
-        return extract_sources_from_tool_messages(result.get("messages", []))
+        return result.get("source", [])
 
     def _extract_reasoning(self, result: dict) -> str:
         return

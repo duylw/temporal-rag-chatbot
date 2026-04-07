@@ -1,0 +1,29 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from src.schemas.agentic_ask import AgenticAskResponse
+from src.dependencies import get_agentic_rag_service, AgenticRAGDep
+
+router = APIRouter(prefix="/agentic_ask", tags=["ask"])
+
+@router.post("/")
+async def ask_question(question: str, rag_service: AgenticRAGDep) -> AgenticAskResponse:
+    # Placeholder implementation
+    # In a real implementation, you would process the question and return an answer
+
+    try:
+        results = await rag_service.ask(question)
+        
+        return AgenticAskResponse(
+            query=question,
+            rewritten_query=results.get("rewritten_query", ""),
+            answer=results.get("answer", "No answer found."),
+            sources=results.get("sources", []),
+            n_iterations=results.get("n_iterations", 0),
+            execution_time=results.get("execution_time", 0.0),
+            guardrail_result=results.get("guardrail_result")
+        )
+
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing question: {str(e)}")
+

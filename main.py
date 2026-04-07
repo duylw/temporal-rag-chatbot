@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.api.users import router as users_router
 from src.api.videos import router as videos_router
 from src.api.chunks import router as chunks_router
-from src.api.ask import router as ask_router
+from src.api.agentic_ask import router as agentic_ask_router
+
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,6 +15,8 @@ from src.database.seed import seed_db_if_empty, seed_vector_db_if_empty
 from src.services.rag.bm25 import make_bm25_retriever
 from src.services.rag.vectordb import make_vector_db, make_vector_db_retriever
 from src.services.rag.factory import make_agentic_rag_service
+from src.core.config import get_settings
+
 
 from dotenv import load_dotenv
 load_dotenv() # Load environment variables from .env file
@@ -26,6 +29,13 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Settings setup
+    logger.info("Loading application settings...")
+    settings = get_settings()
+    app.state.settings = settings
+    logger.info("Application settings loaded and stored in app state.")
+
+
     # This runs when the server starts
     async with engine.begin() as conn:
         # Create all tables defined in your models
@@ -50,8 +60,13 @@ async def lifespan(app: FastAPI):
     logging.info("Initialized Chroma retriever and stored in app state.")
 
     #Create and store Agentic Rag Service in the app state for later use
-    logging.info("Initializing Agentic RAG service...")
-    rag_service = make_agentic_rag_service(bm25_retriever, chroma_retriever)
+    logging.info("Initializing Agentic RƯAG service...")
+    rag_service = make_agentic_rag_service(
+            bm25_retriever,
+            chroma_retriever,
+            retriever_top_k=settings.retriever_top_k,
+            reranker_top_k=settings.reranker_top_k,
+        )
     app.state.rag_service = rag_service
     logging.info("Initialized Agentic RAG service and stored in app state.")
 
@@ -62,7 +77,7 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(users_router)
 app.include_router(videos_router)
 app.include_router(chunks_router)
-app.include_router(ask_router)
+app.include_router(agentic_ask_router)
 
 app.add_middleware(
     CORSMiddleware,

@@ -43,5 +43,9 @@ class Settings(BaseConfigSettings):
     CHROMA_PORT:str = "8000"
     EMBEDDING_MODEL:str = "gemini-embedding-2-preview"
 
+    # Retriever and Reranker settings
+    retriever_top_k: int = 10
+    reranker_top_k: int = 10
+
 def get_settings() -> Settings:
     return Settings()

@@ -12,5 +12,8 @@ wheels/
 # LLMs and Embeddings models weights
 models/
 
+# Raw video files
+*.mp4
+
 # Environment variables file
 .env

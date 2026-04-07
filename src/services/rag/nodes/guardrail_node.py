@@ -1,6 +1,6 @@
 
 from src.services.rag.state import (
-    QueryEvaluation,
+    GuardrailEvaluation,
     ThreadState
 )
 
@@ -29,14 +29,14 @@ def continue_after_guardrail(state: ThreadState, runtime: Runtime[Context]) -> L
     :param runtime: Runtime context containing guardrail threshold
     :returns: "continue" if score >= threshold, "out_of_scope" otherwise
     """
-    user_query_grade = state.get("user_query_grade")
-    if not user_query_grade:
+    guardrail_result = state.get("guardrail_result")
+    if not guardrail_result:
         return "continue"
 
-    return "continue" if user_query_grade.is_lecture_related else "out_of_scope"
+    return "continue" if guardrail_result.is_lecture_related else "out_of_scope"
 
 
-async def invoke_query_guardrail(state: ThreadState, runtime: Runtime[Context]) -> Dict[str, List[QueryEvaluation] | int]:
+async def invoke_query_guardrail(state: ThreadState, runtime: Runtime[Context]) -> Dict[str, List[GuardrailEvaluation] | int]:
     """Evaluate the initial query for relevance and clarity."""
     logger.info("NODE: invoke_query_guardrail")
     updates = {}
@@ -49,14 +49,14 @@ async def invoke_query_guardrail(state: ThreadState, runtime: Runtime[Context]) 
     llm = ChatGoogleGenerativeAI(
         model=runtime.context.llm_model,
         temperature=runtime.context.temperature
-        ).with_structured_output(QueryEvaluation)
+        ).with_structured_output(GuardrailEvaluation)
 
     logger.info("Invoking LLM for query evaluation...")
     res = await llm.ainvoke(prompt)
 
     logger.info(f"Grade result - Is lecture related: {res.is_lecture_related}, Reasoning: {res.reasoning[:50]}...")
 
-    updates["user_query_grade"] = res
+    updates["guardrail_result"] = res
     updates["n_llm_calls"] = state.get("n_llm_calls", 0) + 1
 
     return updates

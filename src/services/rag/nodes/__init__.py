@@ -5,7 +5,7 @@ from .out_of_scope_node import invoke_out_of_scope_response
 from .retrieve_node import invoke_get_relevant_documents
 from .rewrite_query_node import invoke_query_rewrite
 from .rerank_node import invoke_rerank
-from .node_response import invoke_response
+from .reponse_node import invoke_response
 __all__ = [
     "invoke_query_guardrail",
     "continue_after_guardrail",
