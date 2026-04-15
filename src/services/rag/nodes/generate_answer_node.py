@@ -14,6 +14,10 @@ from src.services.rag.context import Context
 
 from langgraph.runtime import Runtime
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langfuse.langchain import CallbackHandler
+
+
+
 from typing import Dict
 import logging
 

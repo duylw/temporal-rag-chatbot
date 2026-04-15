@@ -36,8 +36,6 @@ class Settings(BaseConfigSettings):
         # Note the use of postgresql+asyncpg://
         return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
-    GOOGLE_API_KEY:str = ""
-
     # ChromaDB connection settings match what we have in compose.yaml
     CHROMA_HOST:str = "localhost"
     CHROMA_PORT:str = "8000"
@@ -46,6 +44,10 @@ class Settings(BaseConfigSettings):
     # Retriever and Reranker settings
     retriever_top_k: int = 10
     reranker_top_k: int = 10
+
+    # Langfuse
+    
+    
 
 def get_settings() -> Settings:
     return Settings()

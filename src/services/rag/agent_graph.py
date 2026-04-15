@@ -20,9 +20,13 @@ from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_core.messages import HumanMessage
 from langgraph.graph import StateGraph, END
 
+from langfuse.langchain import CallbackHandler
+from langfuse import get_client, propagate_attributes
+
 from langgraph.prebuilt import tools_condition, ToolNode
 from collections.abc import AsyncGenerator
 from typing import Optional
+import uuid
 import time
 import logging
 
@@ -138,8 +142,19 @@ class AgenticRagService:
           reranker_top_k = self.graph_config.reranker_top_k,
           n_iterations = self.graph_config.n_iterations
         )
+        
+        handler = CallbackHandler()
 
-        result = await self.graph.ainvoke(inital_state, context=runtime_context)
+        result = await self.graph.ainvoke(
+                            inital_state,
+                            context=runtime_context,
+                            config = {
+                                "callbacks": [handler],
+                                "metadata": {
+                                    "langfuse_session_id": str(uuid.uuid4()),
+                                },
+                            }
+                        )
 
         execution_time = time.time() - start_time
         logger.info(f"Graph execution completed in {execution_time:.2f}s")

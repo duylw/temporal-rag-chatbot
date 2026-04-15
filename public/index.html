@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Dashboard - Videos & Chunks</title>
+    <!-- Add this line below your title -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -155,8 +157,8 @@
         }
 
         .chunks-list {
-            transition: max-height 0.3s ease, opacity 0.3s ease;
-            max-height: 2000px;
+            transition: max-height 0.5s ease, opacity 0.5s ease;
+            max-height: 20000px; /* <--- Increased so the content is never cut off */
             opacity: 1;
             overflow: hidden;
         }
@@ -233,6 +235,24 @@
             margin-top: 8px;
         }
 
+        .chunk-content p {
+            margin-bottom: 8px;
+        }
+        .chunk-content p:last-child {
+            margin-bottom: 0;
+        }
+        .chunk-content code {
+            background-color: #eee;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        .chunk-content pre code {
+            display: block;
+            padding: 10px;
+            overflow-x: auto;
+        }
+
         .error-message {
             background-color: #fee;
             color: #c33;
@@ -278,6 +298,19 @@
         .stat-label {
             color: #666;
             font-size: 14px;
+        }
+
+        /* Force bullet points and numbers to stay inside the box */
+        .chunk-content ul, 
+        .chunk-content ol {
+            padding-left: 20px;
+            margin-bottom: 10px;
+            list-style-position: inside; /* This strictly forces bullets inside the container */
+        }
+
+        .chunk-content li {
+            margin-bottom: 5px;
+            margin-left: 10px; /* Extra nudge to ensure they clear the blue border */
         }
 
         @media (max-width: 768px) {
@@ -394,7 +427,7 @@
                                         <div class="chunk-id">${chunk.id}</div>
                                         <span class="chunk-timestamp">⏱️ ${formatTimestamp(chunk.timestamp)}</span>
                                     </div>
-                                    <div class="chunk-content">${escapeHtml(chunk.content)}</div>
+                                    <div class="chunk-content">${marked.parse(chunk.content)}</div>
                                 </div>
                             `).join('')
                             : '<div style="padding: 15px; text-align: center; color: #999;">No chunks for this video</div>'

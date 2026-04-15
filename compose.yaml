@@ -44,10 +44,8 @@ services:
     image: postgres:16-alpine
     restart: always
     # Set up the default database, user, and password
-    environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: fastapidb
+    env_file:
+      - .env
     # Map the container's Postgres port to your local machine
     ports:
       - "5433:5432"
@@ -58,6 +56,8 @@ services:
   chromadb:
     image: chromadb/chroma
     restart: always
+    env_file:
+      - .env
     volumes:
       - chroma_data:/data
     ports:
