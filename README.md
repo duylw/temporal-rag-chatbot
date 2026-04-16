@@ -4,9 +4,11 @@ Dự án này là hệ thống Hỏi/Đáp (Q&A) nâng cao dựa trên kiến tr
 
 ## Thành viên nhóm
 
-1. **Lương Quang Duy** - [23520368] - [GitHub](https://github.com/duylw)
-2. **[Nguyễn Bá Long]** - [23520880] - [GitHub](https://github.com/NBasLongz)
-3. **[Dương Thái Ý Nhi]** - [23521106] - [GitHub](https://github.com/dtynhi)
+| STT | Họ và Tên | MSSV | GitHub |
+| :---: | :--- | :---: | :--- |
+| 1 | Lương Quang Duy | 23520368 | [duylw](https://github.com/duylw) |
+| 2 | Nguyễn Bá Long | 23520880 | [NBasLongz](https://github.com/NBasLongz) |
+| 3 | Dương Thái Ý Nhi | 23521106 | [dtynhi](https://github.com/dtynhi) |
 
 ## Giới thiệu dự án
 
