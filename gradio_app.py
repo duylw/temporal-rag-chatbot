@@ -112,7 +112,7 @@ body, .gradio-container {
 
 .hero-bar {
   background: var(--gradient-hero);
-  padding: 48px 40px 40px;
+  padding: 16px 40px 12px;
   position: relative;
   overflow: hidden;
   text-align: center;
@@ -154,9 +154,9 @@ body, .gradio-container {
 }
 
 .main-content {
-  max-width: var(--max-width);
+  max-width: 100%;
   margin: 0 auto;
-  padding: 32px 24px 24px;
+  padding: 32px 40px 24px;
   box-sizing: border-box;
   width: 100%;
 }
@@ -171,7 +171,7 @@ body, .gradio-container {
   border: 1px solid var(--border-light) !important;
   border-radius: var(--radius) !important;
   box-shadow: var(--shadow-card) !important;
-  padding: 24px !important;
+  padding: 12px !important;
   transition: box-shadow 0.25s ease, border-color 0.25s ease;
   width: 100%;
   box-sizing: border-box;
@@ -208,12 +208,18 @@ body, .gradio-container {
   border-radius: var(--radius-sm) !important;
   color: var(--text-dark) !important;
   font-size: 0.95rem !important;
-  padding: 14px 18px !important;
+  padding: 10px 16px !important; 
   transition: all 0.2s ease !important;
-  min-height: 52px !important;
+  min-height: unset !important; 
+  height: 42px !important; 
+  max-height: 42px !important; 
   width: 100% !important;
   box-sizing: border-box !important;
+  resize: none !important;
+  overflow-y: hidden !important;
+  flex-grow: 0 !important;
 }
+
 .search-input textarea:focus {
   background: var(--bg-white) !important;
   border-color: var(--border-focus) !important;
@@ -252,7 +258,10 @@ body, .gradio-container {
   color: var(--text-body) !important;
   min-height: 160px;
   width: 100%;
+  padding: 20px 20px 20px 20px !important; /* Trái Phải Dưới Trên */
+  padding-top: 10px !important; /* <--- GIẢM KHOẢNG CÁCH TRÊN XUỐNG CHỈ CÒN 10px */
 }
+
 .response-area h1, .response-area h2, .response-area h3 {
   color: var(--text-dark) !important;
   font-weight: 600 !important;
@@ -392,7 +401,7 @@ def create_gradio_interface():
 
         gr.HTML("""
         <div class="hero-bar">
-          <h1>Agentic RAG Assistant</h1>
+          <h1>RAG-based Lecture Video Q&A System</h1>
           <p><span class="status-dot"></span>Intelligent Search & Video Retrieval</p>
         </div>
         """)
@@ -407,7 +416,7 @@ def create_gradio_interface():
                         query_input = gr.Textbox(
                             placeholder="Enter your question...",
                             elem_classes=["search-input"],
-                            lines=2,
+                            lines=1,
                             show_label=False,
                         )
                         submit_btn = gr.Button(
